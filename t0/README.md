@@ -4,7 +4,7 @@ This folder contains excercises with Ansible as part of t0 learning.
 
 There are my first steps and notes for Ansible.
 
-Here I created the two tier application (webserver + lb) and fully configured it for Spring Petclinic app.
+Here I created the two tier application (webserver + lb) and fully configured it for sample PHP app.
 
 ---
 
