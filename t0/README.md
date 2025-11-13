@@ -1,4 +1,4 @@
-# Ansible course
+# Ansible course - intro to Ansible
 
 This repository contains excercises with Ansible - Configuration Automation Tool.
 
