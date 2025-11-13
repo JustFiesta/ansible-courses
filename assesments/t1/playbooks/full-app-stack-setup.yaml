@@ -1,0 +1,18 @@
+---
+- name: Build and Run Backend on Server
+  hosts: backend
+  become: yes
+  roles:
+    - ../roles/backend
+
+- name: Setup and Deploy Nginx Web Servers with application
+  hosts: webservers
+  become: yes
+  roles:
+    - ../roles/webserver
+
+- name: Setup and Deploy HAProxy Load Balancer for Web Servers
+  hosts: loadbalancers
+  become: yes
+  roles:
+    - ../roles/loadbalancer
