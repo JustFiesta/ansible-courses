@@ -1,0 +1,19 @@
+webservers:
+  hosts:
+    web1:
+      ansible_port: 2221
+    web2:
+      ansible_port: 2222
+  
+loadbalancers:
+  hosts:
+    lb:
+      ansible_port: 2220
+
+all: 
+  vars:
+    ansible_host: 127.0.0.1
+    ansible_user: ansible
+    ansible_ssh_pass: ansible
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
