@@ -1,0 +1,13 @@
+---
+- name: Setup and Deploy Web Servers
+  hosts: webservers
+  become: yes
+
+  roles:
+    - ../roles/common
+
+- name: Setup and Deploy Load Balancer for Web Servers
+  hosts: webservers
+  become: yes
+  roles:
+    - ../roles/common
