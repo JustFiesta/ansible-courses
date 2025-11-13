@@ -2,11 +2,7 @@
 
 This Ansible project demonstrates basic infrastructure automation skills for deploying the Spring Petclinic application.
 
-## Project Overview
-
-This project automates the deployment of a Spring Boot application (Spring Petclinic) using Ansible. It handles dependency installation, code deployment, and application runtime configuration.
-
-Application is Deploied as Docker container.
+Application is deployed as Docker container.
 
 ## Project Structure
 
