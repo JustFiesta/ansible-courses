@@ -10,6 +10,11 @@ loadbalancers:
     lb:
       ansible_port: 2220
 
+backend:
+  hosts:
+    backend:
+      ansible_port: 2223
+
 all: 
   vars:
     ansible_host: 127.0.0.1
