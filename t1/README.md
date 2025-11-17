@@ -225,7 +225,7 @@ Now it is required to specify used module and from whitch collection:
     state: directory
 ```
 
-## GPG Projeck Signing
+## GPG Project Signing
 
 Secure your Ansible content with cryptographic signing to ensure integrity and authenticity of playbooks, roles, and collections.
 
@@ -237,12 +237,14 @@ The `ansible-sign` utility provides GPG-based signing and verification for Ansib
 
 ### Usage
 
+NOTE: `gpg` tool should be present on machine
+
 ```bash
 # Sign project
 ansible-sign project gpg-sign /path/to/project --gpg-key-id KEY_ID
 
 # Verify signature  
-ansible-sign project verify /path/to/project
+ansible-sign project gpg-verify /path/to/project
 ```
 
 ### Project Structure
@@ -251,8 +253,8 @@ ansible-sign project verify /path/to/project
 project/
 ├── MANIFEST.in
 ├── .ansible-sign/
-│   ├── sha256sum.txt
-│   └── sha256sum.txt.asc
+│   ├── sha256sum.txt     # project files checkum divided by new line
+│   └── sha256sum.txt.sig # signature of project
 └── [role/collection files]
 ```
 
