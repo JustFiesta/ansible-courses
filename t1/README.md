@@ -1,6 +1,6 @@
 # More advanced Ansible usage
 
-Here are informations about more non-regular ansible usaged.
+Here are informations about non-regular ansible usaged. More enterprise oriented.
 
 ## Dry running with diff
 
@@ -437,4 +437,37 @@ ansible-galaxy collection install namespace.collection_name
 # Use collection module
 - namespace.collection_name.module_name:
     parameter: value
+```
+
+## Linux XFS quota management
+
+In some IT scenarios there is a need to manage user quotas for shared systems. Ansible can do that via community package `xfs_general`.
+
+```yaml
+- name: Ensure xfsprogs is installed
+    ansible.builtin.package:
+    name: xfsprogs
+    state: present
+
+- name: Configure user quotas for "devops" on data
+    community.general.xfs_quota:
+    type: user
+    name: devops
+    mountpoint: /mnt/data
+    bsoft: 5G
+    bhard: 10G
+    isoft: 10000
+    ihard: 20000
+    state: present
+
+- name: Configure group quotas for "devops" on data
+    community.general.xfs_quota:
+    type: group
+    name: devops
+    mountpoint: /mnt/data
+    bsoft: 20G
+    bhard: 50G
+    isoft: 50000
+    ihard: 100000
+    state: present
 ```
