@@ -50,7 +50,15 @@ Lock, enable and disable accounts. Can be parametrized and used as adhoc/group c
   ansible.builtin.user:
     name: johndoe
     state: present
+    password_lock: false
     shell: /bin/bash
+
+- name: Password expiration date
+  ansible.builtin.user:
+    name: johndoe
+    password_expire_min: 7
+    password_expire_max: 90
+    # other cannot be set like: warn days, inactive days, expiration date - this might be used via shell module
 ```
 
 ## Password Management
@@ -110,6 +118,13 @@ Group CRUD Operations
     name: johndoe
     groups: developers
     remove: yes
+
+- name: Change primary group
+  ansible.builtin.user:
+    name: johndoe
+    group: devs # primary group
+    groups: ops,tests # other grups
+    append: true # apply groups to exisiting ones
 ```
 
 [user ref](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/user_module.html)
