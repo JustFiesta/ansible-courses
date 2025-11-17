@@ -1,8 +1,8 @@
 # More advanced Ansible usage
 
-Here are informations about non-regular ansible usaged. More enterprise oriented.
+Here are my notes about non-regular ansible usaged. More enterprise oriented.
 
-Here I placed the more generic informations for Ansible usage.
+In this README I placed the more generic informations for Ansible usage.
 
 For more specific information check the folders in `t1/`.
 
@@ -223,6 +223,45 @@ Now it is required to specify used module and from whitch collection:
   ansible.builtin.file:
     path: /tmp/test
     state: directory
+```
+
+## GPG Projeck Signing
+
+Secure your Ansible content with cryptographic signing to ensure integrity and authenticity of playbooks, roles, and collections.
+
+Usefull when publishing anything Ansible related on web.
+
+The `ansible-sign` utility provides GPG-based signing and verification for Ansible projects, protecting against unauthorized modifications.
+
+[Tool ref](https://github.com/ansible/ansible-sign)
+
+### Usage
+
+```bash
+# Sign project
+ansible-sign project gpg-sign /path/to/project --gpg-key-id KEY_ID
+
+# Verify signature  
+ansible-sign project verify /path/to/project
+```
+
+### Project Structure
+
+```text
+project/
+├── MANIFEST.in
+├── .ansible-sign/
+│   ├── sha256sum.txt
+│   └── sha256sum.txt.asc
+└── [role/collection files]
+```
+
+### MANIFEST.in example
+
+```in
+include *.yml
+recursive-include tasks *
+recursive-include meta *
 ```
 
 ## Checkout Git Repository on Target Hosts
