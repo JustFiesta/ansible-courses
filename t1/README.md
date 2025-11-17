@@ -4,6 +4,8 @@ Here are informations about non-regular ansible usaged. More enterprise oriented
 
 Here I placed the more generic informations for Ansible usage.
 
+For more specific information check the folders in `t1/`.
+
 ## Dry running with diff
 
 Shows changes that Ansible will perform without propagating them to hosts.
