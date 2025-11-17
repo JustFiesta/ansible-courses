@@ -56,7 +56,7 @@ Create symbolic and hard links.
 
 ### Find operations
 
-Rename and find files by extension.
+Find module is a wrapper around POSIX find command. It can perform similar operations.
 
 ```yaml
 - name: Find all .log files
