@@ -1,6 +1,6 @@
 # More advanced Ansible usage
 
-Here are excercises I performed to get more knowlage of Ansible
+Here are informations about more non-regular ansible usaged.
 
 ## Dry running with diff
 
@@ -34,9 +34,21 @@ User has options to define:
 
 Can be used as Audit/Automation Center. Also integrates with CI/CD.
 
-## Custom Standalone Ansible Runners
+## Best Practices for Role Development
 
-Sometimes ansible Runners need to have additional python libraries; ansible collections or other binaries. With `ansible-builder` user can create standalone container with all dependencies and use it as Ansible runner.
+`ansible-later` is a Linter for Ansible code, designed to enforce coding standards and best practices during role development. It performs quality checks to ensure roles are well-structured and maintainable.
+
+Integrating ansible-later into CI/CD pipeline helps maintain high-quality, consistent code and catches issues early, before deployment.
+
+```bash
+ansible-later roles/my-role/
+```
+
+## Custom Standalone Ansible Runners (Execution Environment)
+
+Sometimes ansible Runners need to have additional python libraries; ansible collections or other binaries, and to be reaproducable.
+
+With `ansible-builder` user can create standalone container with all dependencies and use it as Ansible runner.
 
 This tool enables users to create stable and repetetive Ansible runner environments.
 
@@ -48,6 +60,8 @@ AWX and AAP are using EE.
 - Ansible Collection (for installing in EE)
 - Python libraries (requirements.txt or package names)
 - binaries (bindep.txt)
+
+[More here](https://docs.ansible.com/projects/ansible/latest/getting_started_ee/index.html)
 
 eg.
 
@@ -79,13 +93,13 @@ ansible-builder build -t my-ee:latest
 ansible-runner run -p playbooks/test-playbook.yaml --inventory inventories/my-inventory.yaml --container-image=my-ee
 ```
 
-## Ansible Config
+## Configuration Management
 
-In ansible.cfg there are many options to tailor Ansible actions.
+In `ansible.cfg` there are many options to tailor Ansible actions.
 
 One of them is `host_key_checking`. This might speed up process when set to False.
 
-(Other Configuration Options)[https://docs.ansible.com/projects/ansible/latest/reference_appendices/config.html]
+[Other Configuration Options](https://docs.ansible.com/projects/ansible/latest/reference_appendices/config.html)
 
 Also user can debug current configuration with `ansible-config` tool.
 
@@ -100,9 +114,11 @@ Ansible provides reserved variables. Magic variables are special built-in variab
 
 [Magic Vars ref](https://docs.ansible.com/projects/ansible/latest/reference_appendices/special_variables.html)
 
-## Run Handlers only on change
+## Handlers Control
 
 On default Ansible Runs all Handlers after all tasks. Notified handlers are executed automatically after each of the following sections
+
+### Flush handlers
 
 To change that use flush before handler usage:
 
@@ -120,7 +136,7 @@ tasks:
 
 [More on Handlers](https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_handlers.html)
 
-## Handlers listeners
+### Group handlers with listeners
 
 Handlers can listen on topics that can group multiple handlers as follows:
 
@@ -128,20 +144,13 @@ Handlers can listen on topics that can group multiple handlers as follows:
 tasks:
   - name: Restart everything
     command: echo "this task will restart the web services"
-    notify: "restart web services"
+    notify: "restart service"
 
 handlers:
-  - name: Restart memcached
-    service:
-      name: memcached
-      state: restarted
-    listen: "restart web services"
-
-  - name: Restart apache
-    service:
-      name: apache
-      state: restarted
-    listen: "restart web services"
+  - name: restart service A
+    listen: "restart services"
+  - name: restart service B  
+    listen: "restart services"
 ```
 
 ## Ansible Vault
@@ -175,7 +184,7 @@ ansible-vault decrypt password.yaml
 # Place password for file encryption
 ```
 
-## Ansible Vault in Playbook
+### Ansible Vault in Playbook
 
 1. Place variable in separete YAML file
 2. Encrypt with Vault
@@ -183,13 +192,13 @@ ansible-vault decrypt password.yaml
 
     ```shell
     - name: Include Vault Var
-    ansible.builtin.include_vars:
+      ansible.builtin.include_vars:
         file: password.yaml
     ```
 
 4. Run playbook with `--ask-vault-password`
 
-## Ansible builtin vs Ansible Legacy modules
+### Ansible builtin vs Ansible Legacy modules
 
 - `ansible.builtin` - the collection shipped with `ansible-core`. Basic modules splitted into collections
 - `ansible.legacy` - superset of `ansible.builtin`, with custom plugins in configured paths. Before Collection style modules were supported. Left as compatibility layer.
@@ -203,7 +212,7 @@ Instead of using legacy mappings:
     state: directory
 ```
 
-Now it is required to specify used module:
+Now it is required to specify used module and from whitch collection:
 
 ```yaml
 - name: Create catalog
@@ -211,24 +220,6 @@ Now it is required to specify used module:
     path: /tmp/test
     state: directory
 ```
-
-## Ansible builtin
-
-All builtin collections are present for numerous of common tasks (reboot, shutdown, ping, file edits, service management, etc.)
-
-[Collection ref](https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/index.html)
-
-## File edits
-
-Ansible builtin provides two ways to edit files. Single and multi-line edits. They support regex and other normal structure (state, dest, etc.)
-
-### Single Line
-
-[Module ref](https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/lineinfile_module.html)
-
-### Multi Line block
-
-[Module ref](https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/blockinfile_module.html)
 
 ## Checkout Git Repository on Target Hosts
 
@@ -241,102 +232,33 @@ Git module enables users to deploy software from git repositories (HTTPS/SSH con
 This requires SSH key present on target machine so it can connect to repo.
 
 ```yaml
-- name: git module demo
-  hosts: all
-  vars:
-    repo: "git@github.com:user/repo.git"
-    dest: "/home/ansible_user/repo"
-    sshkey: "~/.ssh/id_rsa"
-  tasks:
-    - name: ensure git pkg installed
-      ansible.builtin.yum:
-        name: git
-        state: present
-        update_cache: true
-      become: true
+- name: ensure git pkg installed
+    ansible.builtin.yum:
+    name: git
+    state: present
+    update_cache: true
+    become: true
 
-    - name: checkout git repo
-      ansible.builtin.git:
-        repo: "{{ repo }}"
-        dest: "{{ dest }}"
-        key_file: "{{ sshkey }}"
+- name: checkout git repo
+    ansible.builtin.git:
+    repo: git@github.com:user/repo.git
+    dest: /path/to/repo
+    key_file: ~/.ssh/id_rsa
 ```
 
 ### HTTPS connection Checkout
 
 ```yaml
-- name: git module demo
-  hosts: all
-  tasks:
-    - name: ensure git pkg installed
-      ansible.builtin.yum:
-        name: git
-        state: present
-      become: true
+- name: ensure git pkg installed
+    ansible.builtin.yum:
+    name: git
+    state: present
+    become: true
 
-    - name: checkout git repo
-      ansible.builtin.git:
-        repo: https://github.com/user/repo.git
-        dest: /home/ansible_user/repo
-```
-
-## Copy files
-
-`fetch` and `copy` modules enable users to fetch files from hosts machines.
-
-### Remote -> local
-
-```yaml
-- name: fetch module demo
-  hosts: all
-  become: true
-  vars:
-    log_file: "/var/log/messages"
-    dump_dir: "logs"
-  tasks:
-    - name: fetch log
-      ansible.builtin.fetch:
-        src: "{{ log_file }}"
-        dest: "{{ dump_dir }}"
-```
-
-[fetch ref](https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/fetch_module.html#ansible-collections-ansible-builtin-fetch-module)
-
-### Local -> Remote
-
-```yaml
-- name: copy module demo
-  hosts: all
-  become: false
-  tasks:
-    - name: copy report.txt
-      ansible.builtin.copy:
-        src: report.txt
-        dest: /home/ansible_user/report.txt
-        owner: ansible_user
-        mode: '0644'
-
-```
-
-[copy ref](https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/copy_module.html#ansible-collections-ansible-builtin-copy-module)
-
-## Read files from remote host
-
-`ansible.builtin.slurp` Reads a file from a remote host and returns its content base64-encoded.
-
-Useful for fetching configuration files, certificates, or any file for auditing or processing in playbooks.
-
-TIP: Remember it requires base64 (ENCODE and DECODE) for usage of file contents.
-
-```yaml
-- name: Slurp remote file
-    ansible.builtin.slurp:
-    src: /etc/hostname
-    register: hostname_raw
-
-- name: Decode and show file content
-    ansible.builtin.debug:
-    msg: "{{ hostname_raw.content | b64decode }}"
+- name: checkout git repo
+    ansible.builtin.git:
+    repo: https://github.com/user/repo.git
+    dest: /path/to/repo
 ```
 
 ## Templating
@@ -481,3 +403,38 @@ Ansible provides builtin controller for cron.d. It enables users to control CRON
 ```
 
 [cron ref](https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/cron_module.html#ansible-collections-ansible-builtin-cron-module)
+
+## Ansible Galaxy Community Repo
+
+Ansible has a community driver repository for Custom roles and collections.
+
+### Using community Roles
+
+Install and use pre-built roles from the community
+
+```shell
+# Install role
+ansible-galaxy role install username.role_name
+```
+
+```yaml
+# Use in playbook
+- hosts: all
+  roles:
+    - username.role_name
+```
+
+### Using community Collections
+
+Install and reference community collections
+
+```shell
+# Install collection
+ansible-galaxy collection install namespace.collection_name
+```
+
+```yaml
+# Use collection module
+- namespace.collection_name.module_name:
+    parameter: value
+```
