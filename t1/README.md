@@ -2,9 +2,9 @@
 
 Here are my notes about non-regular ansible usaged. More enterprise oriented.
 
-In this README I placed the more generic informations for Ansible usage.
+Each folder contains README with examples on given topic. It serves as entrypoint to deep dive into given topic.
 
-For more specific information check the folders in `t1/`.
+In this README I placed the more generic informations for Ansible usage.
 
 ## Dry running with diff
 
