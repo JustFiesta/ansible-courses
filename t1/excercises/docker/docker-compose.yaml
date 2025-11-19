@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  host1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: host1
+    hostname: host1
+    networks:
+      guests_network:
+        ipv4_address: 172.20.0.11
+    ports:
+      - "30221:22"  # SSH ansible Conncetion to host1
+    volumes:
+      - host1_data:/var/www
+    privileged: true
+    restart: unless-stopped
+
+  host2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: host2
+    hostname: host2
+    networks:
+      guests_network:
+        ipv4_address: 172.20.0.12
+    ports:
+      - "30222:22"  # SSH ansible Conncetion to host2
+    volumes:
+      - host2_data:/var/www
+    privileged: true
+    restart: unless-stopped
+
+networks:
+  guests_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  host1_data:
+  host2_data:
