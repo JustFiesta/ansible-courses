@@ -1,19 +1,19 @@
 webservers:
   hosts:
     web1:
-      ansible_port: 2221
+      ansible_port: 30221
     web2:
-      ansible_port: 2222
+      ansible_port: 30222
   
 loadbalancers:
   hosts:
     lb:
-      ansible_port: 2220
+      ansible_port: 30220
 
 backend:
   hosts:
     backend:
-      ansible_port: 2223
+      ansible_port: 30223
 
 all: 
   vars:
