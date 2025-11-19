@@ -1,10 +1,73 @@
-# Custom Ansible Plugins
+# Ansible Plugins
 
-Extend Ansible's functionality by creating custom plugins for specific use cases like API interactions, data processing, or custom lookups.
+Extend Ansible by adding your own plugins or integrating existing third-party ones. Plugins allow you to add logic for lookups, filters, callbacks, inventory discovery, API integrations, and more.
 
 [Custom Plugins ref](https://docs.ansible.com/ansible/latest/dev_guide/developing_plugins.html)
 
-## Plugin Directory Structure
+## Using Existing Plugins
+
+Most plugins already exist in:
+
+- collections (recommended)
+- built-in Ansible core
+- external GitHub repositories
+
+Examples of plugin types that can be reused:
+
+- lookup plugins (API lookups, file parsing, secrets engines)
+- filter plugins (data transformations)
+- callback plugins (logging, profiling, Slack notifications)
+- inventory plugins (AWS, VMware, OpenStack, Kubernetes)
+- connection plugins (SSH, WinRM, network devices)
+- action plugins (logic wrappers around modules)
+
+## How to install an existing plugin
+
+Most third-party plugins are installed by installing their collection:
+
+```shell
+ansible-galaxy collection install author.collection_name
+```
+
+You can verify available plugins in a collection:
+
+```shell
+ansible-doc -t inventory amazon.aws.aws_ec2
+ansible-doc -t lookup community.general
+```
+
+## How Ansible discovers existing plugins
+
+Ansible loads plugins automatically from:
+
+1. collections
+
+    `~/.ansible/collections/ansible_collections/<namespace>/<collection>/plugins/`
+
+2. local project plugin dirs
+
+    ```shell
+    ./lookup_plugins/
+    ./filter_plugins/
+    ./callback_plugins/
+    ```
+
+3. custom paths in ansible.cfg
+
+    ```ini
+    [defaults]
+    lookup_plugins = ./lookup_plugins:/opt/ansible/plugins/lookup
+    filter_plugins = ./filter_plugins
+    callback_plugins = ./callback_plugins
+    ```
+
+No extra configuration is needed if the plugin is part of an installed collection.
+
+## Custom Ansible Plugins
+
+Extend Ansible's functionality by creating custom plugins for specific use cases like API interactions, data processing, or custom lookups.
+
+### Plugin Directory Structure
 
 Place custom plugins in these standard locations
 
@@ -19,7 +82,7 @@ project/
 └── playbook.yml
 ```
 
-### Custom Lookup Plugin Example
+#### Custom Lookup Plugin Example
 
 Create a custom lookup plugin to fetch data from external APIs and use it in your playbooks.
 
@@ -72,7 +135,7 @@ class LookupModule(LookupBase):
             raise AnsibleError(f"API request failed: {str(e)}")
 ```
 
-### Usage in Playbook
+#### Usage in Playbook
 
 ```shell
 - name: Get users from API
@@ -87,22 +150,22 @@ class LookupModule(LookupBase):
     users: "{{ lookup('api_lookup', 'users', token=api_token) }}"
 ```
 
-## Custom Plugins Integration with Execution Environments
+### Custom Plugins Integration with Execution Environments
 
 Custom plugins are integrated into Execution Environments by being included in the container image during the build process, ensuring your automation has access to all required custom functionality in any environment.
 
-### Plugin Discovery in Execution Environments
+#### Plugin Discovery in Execution Environments
 
 Within the Execution Environment container, Ansible searches for plugins in these default paths:
 
 - `/usr/share/ansible/plugins/` - system-wide plugin directory
 - Paths configured via `environment variables` or `ansible.cfg`.
 
-### Adding Plugins to Execution Environments
+#### Adding Plugins to Execution Environments
 
 There are two primary approaches to include custom plugins in your Execution Environment.
 
-#### Method 1: Include Plugin Files in Build Context
+##### Method 1: Include Plugin Files in Build Context
 
 Add plugin source files directly to your execution environment build context and reference them in your `execution-environment.yml`.
 
@@ -134,7 +197,7 @@ project/
 └── requirements.txt
 ```
 
-#### Method 2: Package and Install via Python
+##### Method 2: Package and Install via Python
 
 For more complex plugins, create a Python package and install it via pip
 
