@@ -1,12 +1,31 @@
-# More advanced Ansible usage
+# Advanced Ansible usage
 
-Here are my notes about non-regular ansible usaged. More enterprise oriented.
+Here are my notes about more enterprise oriented Ansible usages. In this REAMDE I placed General knowlage tips for Ansible tools and common module usages.
 
-Each folder contains README with examples on given topic. It serves as entrypoint to deep dive into given topic.
+For ruther information check subfolders. They contain READMEs with examples on given topic. They serve as entrypoint to deep dive into given topic.
 
-In this README I placed the more generic informations for Ansible usage.
+---
 
-## Dry running with diff
+## Ansible tools
+
+Tools I had no idea existed. These might help Ansible development substaincially.
+
+### Configuration Management
+
+In `ansible.cfg` there are many options to tailor Ansible actions.
+
+One of them is `host_key_checking`. This might speed up process when set to False.
+
+[Other Configuration Options](https://docs.ansible.com/projects/ansible/latest/reference_appendices/config.html)
+
+Also user can debug current configuration with `ansible-config` tool.
+
+```shell
+ansible-config dump   # show current config whole
+ansible-config dump --only-changed  # show only changed values in config (stated by user)
+```
+
+### Dry running with diff
 
 Shows changes that Ansible will perform without propagating them to hosts.
 
@@ -14,7 +33,7 @@ Shows changes that Ansible will perform without propagating them to hosts.
 ansible-playbook playbooks/some-playbook.yasml --check --diff
 ```
 
-## Ansible AWX
+### Ansible AWX
 
 The UI for Ansible installation - serves as Full Automation platform. Runs as container (eg. in k8s)
 
@@ -38,7 +57,52 @@ User has options to define:
 
 Can be used as Audit/Automation Center. Also integrates with CI/CD.
 
-## Best Practices for Role Development
+### Ansible Vault
+
+Tool for secret management (password, files, etc.). Included in base installation of Ansible. The `ansible-vault` CLI is used to manage Vault and Secrets.
+
+In one Ansible system there might be many Vaults.
+
+TIP: Store passwords for files in Password Manager as Bitwarden.
+
+eg. File:
+
+```yaml
+---
+password: SuperSecretPass123
+```
+
+#### How-to encrypt
+
+```shell
+ansible-vault encrypt password.yaml
+
+# Place password for file encryption
+```
+
+#### How-to decrypt
+
+```shell
+ansible-vault decrypt password.yaml
+
+# Place password for file encryption
+```
+
+#### Ansible Vault in Playbook
+
+1. Place variable in separete YAML file
+2. Encrypt with Vault
+3. Add include vault task:
+
+    ```shell
+    - name: Include Vault Var
+      ansible.builtin.include_vars:
+        file: password.yaml
+    ```
+
+4. Run playbook with `--ask-vault-password`
+
+### Ansible Linter - enfore best practices for Role Development
 
 `ansible-later` is a Linter for Ansible code, designed to enforce coding standards and best practices during role development. It performs quality checks to ensure roles are well-structured and maintainable.
 
@@ -48,7 +112,7 @@ Integrating ansible-later into CI/CD pipeline helps maintain high-quality, consi
 ansible-later roles/my-role/
 ```
 
-## Custom Standalone Ansible Runners (Execution Environment)
+### Custom Standalone Ansible Runners (Execution Environment)
 
 Sometimes ansible Runners need to have additional python libraries; ansible collections or other binaries, and to be reaproducable.
 
@@ -58,7 +122,7 @@ This tool enables users to create stable and repetetive Ansible runner environme
 
 AWX and AAP are using EE.
 
-### Needed to build Execution Environment
+#### Needed to build Execution Environment
 
 - `execution-environment.yaml` - schema for building EE
 - Ansible Collection (for installing in EE)
@@ -83,7 +147,7 @@ additional_build_step:
     - RUN ls -la
 ```
 
-### Building new EE
+#### Building new EE
 
 It will create ready to use container with Ansible and dependencies stated in `execution-environment.yml`
 
@@ -91,116 +155,93 @@ It will create ready to use container with Ansible and dependencies stated in `e
 ansible-builder build -t my-ee:latest
 ```
 
-### Use new EE
+#### Use new EE
 
 ```shell
 ansible-runner run -p playbooks/test-playbook.yaml --inventory inventories/my-inventory.yaml --container-image=my-ee
 ```
 
-## Configuration Management
+### Ansible Galaxy Community Repo
 
-In `ansible.cfg` there are many options to tailor Ansible actions.
+Ansible has a community driver repository for Custom roles and collections.
 
-One of them is `host_key_checking`. This might speed up process when set to False.
+#### Using community Roles
 
-[Other Configuration Options](https://docs.ansible.com/projects/ansible/latest/reference_appendices/config.html)
-
-Also user can debug current configuration with `ansible-config` tool.
+Install and use pre-built roles from the community
 
 ```shell
-ansible-config dump   # show current config whole
-ansible-config dump --only-changed  # show only changed values in config (stated by user)
+# Install role
+ansible-galaxy role install username.role_name
 ```
 
-## Special Ansible variables
-
-Ansible provides reserved variables. Magic variables are special built-in variables automatically available in your playbooks, roles, and tasks. You don’t need to define them, and they provide information about the current play, host, inventory, or task execution.
-
-[Magic Vars ref](https://docs.ansible.com/projects/ansible/latest/reference_appendices/special_variables.html)
-
-## Handlers Control
-
-On default Ansible Runs all Handlers after all tasks. Notified handlers are executed automatically after each of the following sections
-
-### Flush handlers
-
-To change that use flush before handler usage:
-
 ```yaml
-tasks:
-  - name: Some tasks go here
-    ansible.builtin.shell: ...
-
-  - name: Flush handlers
-    meta: flush_handlers
-
-  - name: Some other tasks
-    ansible.builtin.shell: ...
+# Use in playbook
+- hosts: all
+  roles:
+    - username.role_name
 ```
 
-[More on Handlers](https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_handlers.html)
+#### Using community Collections
 
-### Group handlers with listeners
+Install and reference community collections
 
-Handlers can listen on topics that can group multiple handlers as follows:
-
-```yaml
-tasks:
-  - name: Restart everything
-    command: echo "this task will restart the web services"
-    notify: "restart service"
-
-handlers:
-  - name: restart service A
-    listen: "restart services"
-  - name: restart service B  
-    listen: "restart services"
+```shell
+# Install collection
+ansible-galaxy collection install namespace.collection_name
 ```
 
-## Ansible Vault
-
-Tool for secret management (password, files, etc.). Included in base installation of Ansible. The `ansible-vault` CLI is used to manage Vault and Secrets.
-
-In one Ansible system there might be many Vaults.
-
-TIP: Store passwords for files in Password Manager as Bitwarden.
-
-eg. File:
-
 ```yaml
+# Use collection module
+- namespace.collection_name.module_name:
+    parameter: value
+```
+
+### GPG Project Signing
+
+Secure your Ansible content with cryptographic signing to ensure integrity and authenticity of playbooks, roles, and collections.
+
+Usefull when publishing anything Ansible related on web.
+
+The `ansible-sign` utility provides GPG-based signing and verification for Ansible projects, protecting against unauthorized modifications.
+
+[Tool ref](https://github.com/ansible/ansible-sign)
+
+#### Usage
+
+NOTE: `gpg` tool should be present on machine
+
+```bash
+# Sign project
+ansible-sign project gpg-sign /path/to/project --gpg-key-id KEY_ID
+
+# Verify signature  
+ansible-sign project gpg-verify /path/to/project
+```
+
+#### Project Structure
+
+```text
+project/
+├── MANIFEST.in
+├── .ansible-sign/
+│   ├── sha256sum.txt     # project files checkum divided by new line
+│   └── sha256sum.txt.sig # signature of project
+└── [role/collection files]
+```
+
+#### MANIFEST.in example
+
+```in
+include *.yml
+recursive-include tasks *
+recursive-include meta *
+```
+
 ---
-password: SuperSecretPass123
-```
 
-### How-to encrypt
+## Enterprise oriented knowlage of ansible modules
 
-```shell
-ansible-vault encrypt password.yaml
-
-# Place password for file encryption
-```
-
-### How-to decrypt
-
-```shell
-ansible-vault decrypt password.yaml
-
-# Place password for file encryption
-```
-
-### Ansible Vault in Playbook
-
-1. Place variable in separete YAML file
-2. Encrypt with Vault
-3. Add include vault task:
-
-    ```shell
-    - name: Include Vault Var
-      ansible.builtin.include_vars:
-        file: password.yaml
-    ```
-
-4. Run playbook with `--ask-vault-password`
+Some things about ansible I was scratching my Head earlier. General usage tips on given topics.
 
 ### Ansible builtin vs Ansible Legacy modules
 
@@ -225,54 +266,58 @@ Now it is required to specify used module and from whitch collection:
     state: directory
 ```
 
-## GPG Project Signing
+### Special Ansible variables
 
-Secure your Ansible content with cryptographic signing to ensure integrity and authenticity of playbooks, roles, and collections.
+Ansible provides reserved variables. Magic variables are special built-in variables automatically available in your playbooks, roles, and tasks. You don’t need to define them, and they provide information about the current play, host, inventory, or task execution.
 
-Usefull when publishing anything Ansible related on web.
+[Magic Vars ref](https://docs.ansible.com/projects/ansible/latest/reference_appendices/special_variables.html)
 
-The `ansible-sign` utility provides GPG-based signing and verification for Ansible projects, protecting against unauthorized modifications.
+### Handlers Control
 
-[Tool ref](https://github.com/ansible/ansible-sign)
+On default Ansible Runs all Handlers after all tasks. Notified handlers are executed automatically after each of the following sections
 
-### Usage
+#### Flush handlers
 
-NOTE: `gpg` tool should be present on machine
+To change that use flush before handler usage:
 
-```bash
-# Sign project
-ansible-sign project gpg-sign /path/to/project --gpg-key-id KEY_ID
+```yaml
+tasks:
+  - name: Some tasks go here
+    ansible.builtin.shell: ...
 
-# Verify signature  
-ansible-sign project gpg-verify /path/to/project
+  - name: Flush handlers
+    meta: flush_handlers
+
+  - name: Some other tasks
+    ansible.builtin.shell: ...
 ```
 
-### Project Structure
+[More on Handlers](https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_handlers.html)
 
-```text
-project/
-├── MANIFEST.in
-├── .ansible-sign/
-│   ├── sha256sum.txt     # project files checkum divided by new line
-│   └── sha256sum.txt.sig # signature of project
-└── [role/collection files]
+#### Group handlers with listeners
+
+Handlers can listen on topics that can group multiple handlers as follows:
+
+```yaml
+tasks:
+  - name: Restart everything
+    command: echo "this task will restart the web services"
+    notify: "restart service"
+
+handlers:
+  - name: restart service A
+    listen: "restart services"
+  - name: restart service B  
+    listen: "restart services"
 ```
 
-### MANIFEST.in example
-
-```in
-include *.yml
-recursive-include tasks *
-recursive-include meta *
-```
-
-## Checkout Git Repository on Target Hosts
+### Checkout Git Repository on Target Hosts
 
 Git module enables users to deploy software from git repositories (HTTPS/SSH connection types).
 
 [Module ref](https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/git_module.html#ansible-collections-ansible-builtin-git-module)
 
-### SSH connection Checkout
+#### SSH connection Checkout
 
 This requires SSH key present on target machine so it can connect to repo.
 
@@ -291,7 +336,7 @@ This requires SSH key present on target machine so it can connect to repo.
     key_file: ~/.ssh/id_rsa
 ```
 
-### HTTPS connection Checkout
+#### HTTPS connection Checkout
 
 ```yaml
 - name: ensure git pkg installed
@@ -306,13 +351,13 @@ This requires SSH key present on target machine so it can connect to repo.
     dest: /path/to/repo
 ```
 
-## Templating
+### Templating
 
 Some files might be very similar or just differ in few places (eg. variables, hosts, IP, etc.). Templating comes in handy here.
 
 Create Jinja2 template file and populate it with cusomized variabled via task.
 
-### Example Nginx HTML template
+#### Example Nginx HTML template
 
 ```j2
 <html>
@@ -326,7 +371,7 @@ Create Jinja2 template file and populate it with cusomized variabled via task.
 </html>
 ```
 
-### Template usage
+#### Template usage
 
 ```yaml
 - name: template module demo
@@ -349,7 +394,7 @@ Create Jinja2 template file and populate it with cusomized variabled via task.
         dest: /var/www/html/index.html
 ```
 
-### Loop in file template
+#### Loop in file template
 
 Very usefull for any configuration file with repeating patterns.
 
@@ -384,102 +429,4 @@ Playbook usage:
         root: /var/www/example
       - server_name: test.com
         root: /var/www/test
-```
-
-## Host service management
-
-Ansible provides two modules for service management:
-
-- `ansible.builtin.service` - service state management (has many parameters to tailor usecase, eg. enable, restart, start, etc.)
-- `ansible.windows.win_service` - additional windows service state management
-- `ansible.builtin.service_facts` - service state information
-
-eg.
-
-```yaml
-- name: service module demo
-  hosts: all
-  become: true
-  vars:
-    disable_services:
-      - "nginx.service"
-  tasks:
-    - name: Get Service Info
-      ansible.builtin.service_facts:
-
-    - name: Disable services
-      ansible.builtin.service:
-        name: "{{ item }}"
-        enabled: false
-        state: stopped
-      when: "item in services"
-      with_items: '{{ disable_services }}'
-
-    - name: Check Nginx state
-      debug:
-        msg: "{{ ansible_facts.services['nginx.service'].  state }}"
-```
-
-[service ref](https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/service_module.html#ansible-collections-ansible-builtin-service-module)
-[service_facts ref](https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/service_facts_module.html#ansible-collections-ansible-builtin-service-facts-module)
-
-## CRON job schedule
-
-Ansible provides builtin controller for cron.d. It enables users to control CRONs as a Code.
-
-### Add cronjob
-
-```yaml
-- name: sample cronjob add
-  ansible.builtin.cron:
-    name: "backup /tmp"
-    minute: "0"
-    hour: "2"
-    job: "/usr/bin/rsync -a /tmp /backup"
-```
-
-### Remove cronjob
-
-```yaml
-- name: Remove cronjob
-  ansible.builtin.cron:
-    name: "backup /tmp"
-    state: absent
-```
-
-[cron ref](https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/cron_module.html#ansible-collections-ansible-builtin-cron-module)
-
-## Ansible Galaxy Community Repo
-
-Ansible has a community driver repository for Custom roles and collections.
-
-### Using community Roles
-
-Install and use pre-built roles from the community
-
-```shell
-# Install role
-ansible-galaxy role install username.role_name
-```
-
-```yaml
-# Use in playbook
-- hosts: all
-  roles:
-    - username.role_name
-```
-
-### Using community Collections
-
-Install and reference community collections
-
-```shell
-# Install collection
-ansible-galaxy collection install namespace.collection_name
-```
-
-```yaml
-# Use collection module
-- namespace.collection_name.module_name:
-    parameter: value
 ```
