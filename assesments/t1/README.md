@@ -6,13 +6,12 @@ This project demonstrates infrastructure automation skills using Ansible to depl
 
 - Configuration as Code: Complete environment provisioning through Ansible playbooks
 - Multi-tier Architecture: Web servers + load balancer configuration
-- Environment Management: Different configurations for development/staging/production
-- Security Practices: Secure secrets management and firewall configuration
-- Dynamic Configuration: Template-driven configuration files
 
 ## Prerequisites & Dependencies
 
-Local Machine (Ansible Control Node)
+- Ansible
+- Docker
+- sshpass
 
 ```bash
 # tool to connect to Docker hosts with password for demonstration

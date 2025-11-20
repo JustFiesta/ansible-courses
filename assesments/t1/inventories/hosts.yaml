@@ -10,9 +10,9 @@ loadbalancers:
     lb:
       ansible_port: 30220
 
-backend:
+db:
   hosts:
-    backend:
+    db:
       ansible_port: 30223
 
 all: 

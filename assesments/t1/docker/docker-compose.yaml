@@ -51,19 +51,19 @@ services:
     privileged: true
     restart: unless-stopped
 
-  backend:
+  db:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: backend
-    hostname: backend
+    container_name: db
+    hostname: db
     networks:
       app_network:
         ipv4_address: 172.20.0.100
     ports:
-      - "30223:22"  # SSH ansible Conncetion to backend
+      - "30223:22"  # SSH ansible Conncetion to db
     volumes:
-      - backend_data:/tmp/data
+      - db_data:/tmp/data
     privileged: true
     restart: unless-stopped
 
@@ -78,4 +78,4 @@ volumes:
   web1_data:
   web2_data:
   lb_data:
-  backend_data:
+  db_data:
