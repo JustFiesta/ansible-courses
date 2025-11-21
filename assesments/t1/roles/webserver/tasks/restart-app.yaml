@@ -1,0 +1,6 @@
+---
+- name: Restart the web application service
+  ansible.builtin.systemd:
+    name: webapp
+    state: restarted
+    enabled: yes

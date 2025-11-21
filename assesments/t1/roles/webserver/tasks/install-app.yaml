@@ -1,0 +1,26 @@
+---
+- name: Fetch App code
+  ansible.builtin.git:
+    repo: 'https://github.com/mmumshad/simple-webapp-flask.git'
+    dest: /opt/webapp
+    version: main
+
+- name: Install APT dependencies
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-setuptools
+      - python3-dev
+      - build-essential
+      - python3-pip
+      - default-libmysqlclient-dev
+
+- name: Install Python dependencies
+  ansible.builtin.pip:
+    requirements: /opt/webapp/requirements.txt
+
+- name: Create webapp service
+  ansible.builtin.template:
+    src: webapp.service.j2
+    dest: /etc/systemd/system/webapp.service
+    mode: '0644'

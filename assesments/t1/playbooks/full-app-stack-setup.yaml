@@ -1,11 +1,11 @@
 ---
-- name: Build and Run Backend on Server
-  hosts: backend
+- name: Build and Run MySQL Server
+  hosts: db
   become: yes
   roles:
-    - ../roles/backend
+    - ../roles/db
 
-- name: Setup and Deploy Nginx Web Servers with application
+- name: Setup and Deploy Flask webapp
   hosts: webservers
   become: yes
   roles:
