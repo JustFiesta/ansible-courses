@@ -1,0 +1,5 @@
+---
+# vars file for common
+apt_packages:
+  - git
+  - curl
