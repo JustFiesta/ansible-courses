@@ -12,6 +12,8 @@ services:
         ipv4_address: 172.20.0.11
     ports:
       - "30221:22"  # SSH ansible Conncetion to web1
+    expose:
+      - 5000        # Flask app port
     volumes:
       - web1_data:/var/www
     privileged: true
@@ -28,6 +30,8 @@ services:
         ipv4_address: 172.20.0.12
     ports:
       - "30222:22"  # SSH ansible Conncetion to web2
+    expose:
+      - 5000        # Flask app port
     volumes:
       - web2_data:/var/www
     privileged: true

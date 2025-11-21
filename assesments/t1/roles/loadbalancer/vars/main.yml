@@ -1,2 +1,13 @@
 ---
 # vars file for loadbalancer
+
+haproxy_backends:
+  - name: web1
+    host: 172.20.0.11
+    port: 5000
+  - name: web2
+    host: 172.20.0.12
+    port: 5000
+
+haproxy_stats_port: 8404
+haproxy_listen_port: 80
