@@ -1,9 +1,9 @@
 ---
-- name: Build and Run MySQL Server
-  hosts: db
-  become: yes
-  roles:
-    - ../roles/db
+# - name: Build and Run MySQL Server
+#   hosts: db
+#   become: yes
+#   roles:
+#     - ../roles/db
 
 - name: Setup and Deploy Flask webapp
   hosts: webservers
@@ -11,8 +11,8 @@
   roles:
     - ../roles/webserver
 
-- name: Setup and Deploy HAProxy Load Balancer for Web Servers
-  hosts: loadbalancers
-  become: yes
-  roles:
-    - ../roles/loadbalancer
+# - name: Setup and Deploy HAProxy Load Balancer for Web Servers
+#   hosts: loadbalancers
+#   become: yes
+#   roles:
+#     - ../roles/loadbalancer

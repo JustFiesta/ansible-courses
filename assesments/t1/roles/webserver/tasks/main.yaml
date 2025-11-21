@@ -1,0 +1,7 @@
+
+---
+- name: Install and configure Flask application
+  ansible.builtin.include_tasks: install-app.yaml
+
+- name: Restart Flask application
+  ansible.builtin.include_tasks: restart-app.yaml

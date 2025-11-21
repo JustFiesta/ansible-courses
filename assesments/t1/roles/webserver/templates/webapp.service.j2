@@ -1,0 +1,15 @@
+[Unit]
+Description={{ app_name | title }} Flask Web Application
+After=network.target
+
+[Service]
+Type=simple
+User={{ service_user }}
+WorkingDirectory={{ app_directory }}
+Environment="FLASK_APP={{ app_file }}"
+ExecStart={{ python_binary }} -m flask run --host={{ flask_host }} --port={{ flask_port }}
+Restart={{ service_restart_policy }}
+RestartSec={{ service_restart_sec }}
+
+[Install]
+WantedBy=multi-user.target
