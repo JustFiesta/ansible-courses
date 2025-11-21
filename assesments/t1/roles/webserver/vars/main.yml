@@ -4,7 +4,7 @@
 # Application configuration
 app_name: webapp
 app_repo: https://github.com/mmumshad/simple-webapp-flask.git
-app_repo_version: main
+app_repo_version: master
 app_directory: /opt/webapp
 app_file: app.py
 
