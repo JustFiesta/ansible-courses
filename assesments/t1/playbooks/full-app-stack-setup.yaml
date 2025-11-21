@@ -1,21 +1,23 @@
 ---
-- name: Common Setup for all servers
-  hosts: all
-  become: yes
-  roles:
-    - ../roles/common
-
-# - name: Build and Run MySQL Server
-#   hosts: db
+# - name: Common Setup for all servers
+#   hosts: all
 #   become: yes
 #   roles:
-#     - ../roles/db
+#     - ../roles/common
 
-- name: Setup and Deploy Flask webapp
-  hosts: webservers
+- name: Build and Run MySQL Server
+  hosts: db
   become: yes
+  vars_files:
+    - ../group_vars/all/vault.yaml
   roles:
-    - ../roles/webserver
+    - ../roles/db
+
+# - name: Setup and Deploy Flask webapp
+#   hosts: webservers
+#   become: yes
+#   roles:
+#     - ../roles/webserver
 
 # - name: Setup and Deploy HAProxy Load Balancer for Web Servers
 #   hosts: loadbalancers

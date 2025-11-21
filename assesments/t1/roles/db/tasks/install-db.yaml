@@ -1,0 +1,46 @@
+- name: Install MySQL server
+  ansible.builtin.apt:
+    name:
+      - mysql-server
+      - mysql-client
+      - python3-pymysql
+    state: present
+    update_cache: true
+
+- name: Start MySQL service
+  shell: "service mysql start"
+
+- name: Ensure MySQL data directory exists
+  ansible.builtin.file:
+    path: /var/lib/mysql
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: '0755'
+
+- name: Ensure MySQL run directory exists
+  ansible.builtin.file:
+    path: /var/run/mysqld
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: '0755'
+
+- name: Configure MySQL bind address
+  ansible.builtin.lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind-address'
+    line: 'bind-address = 0.0.0.0'
+    backup: yes
+
+- name: Ensure MySQL is running and enabled
+  ansible.builtin.service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Wait for MySQL to be ready
+  ansible.builtin.wait_for:
+    host: localhost
+    port: 3306
+    timeout: 30

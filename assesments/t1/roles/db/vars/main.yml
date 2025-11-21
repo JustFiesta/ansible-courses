@@ -1,2 +1,25 @@
 ---
 # vars file for db
+
+# MySQL packages
+mysql_packages:
+  - mysql-server
+  - mysql-client
+  - python3-pymysql
+
+# MySQL service name
+mysql_service: mysql
+
+# Database configuration
+mysql_db_name: employees
+mysql_app_user: app_user
+mysql_app_password: app_password
+
+# Root password
+mysql_root_password: root_password
+
+# Bind address (0.0.0.0 for external access)
+mysql_bind_address: 0.0.0.0
+
+# MySQL port
+mysql_port: 3306

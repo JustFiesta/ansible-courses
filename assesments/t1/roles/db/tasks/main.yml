@@ -1,2 +1,8 @@
 ---
 # tasks file for db
+
+- name: Install MySQL server
+  ansible.builtin.include_tasks: install-db.yaml
+
+- name: Configure MySQL database and user
+  ansible.builtin.include_tasks: configure-db.yaml

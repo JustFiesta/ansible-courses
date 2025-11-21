@@ -62,6 +62,8 @@ services:
         ipv4_address: 172.20.0.100
     ports:
       - "30223:22"  # SSH ansible Conncetion to db
+    expose:
+      - 3306
     volumes:
       - db_data:/tmp/data
     privileged: true

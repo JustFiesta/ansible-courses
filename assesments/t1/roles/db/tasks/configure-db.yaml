@@ -1,0 +1,47 @@
+---
+- name: Check if root has a password
+  ansible.builtin.shell: |
+    mysql -u root -e "SELECT 1;" 2>/dev/null
+  register: root_no_pass
+  ignore_errors: true
+
+- name: Change MySQL root password if none
+  community.mysql.mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: root
+    host: localhost
+    password: "{{ mysql_root_password }}"
+    state: present
+  when: root_no_pass.rc == 0
+
+- name: Create database
+  community.mysql.mysql_db:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ mysql_db_name }}"
+    state: present
+
+- name: Create application user
+  community.mysql.mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ mysql_app_user }}"
+    password: "{{ mysql_app_password }}"
+    host: "%"
+    priv: "{{ mysql_db_name }}.*:ALL"
+    state: present
+
+- name: Create employee table
+  community.mysql.mysql_query:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    login_db: "{{ mysql_db_name }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS employee (
+        id INT NOT NULL AUTO_INCREMENT,
+        name VARCHAR(255) NOT NULL,
+        PRIMARY KEY (id)
+      );
